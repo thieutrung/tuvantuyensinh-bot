@@ -15,6 +15,36 @@ import streamlit as st
 
 from config import COHERE_API_KEY
  
+def init_sample_data():
+    """Khởi tạo dữ liệu mẫu nếu chưa có document nào"""
+    doc_manager = DocumentManager()
+    if not doc_manager.get_all_documents():
+        try:
+            # Load file PDF mẫu từ thư mục data
+            sample_pdf = os.path.join('data', 'documents', '1.pdf')
+            if os.path.exists(sample_pdf):
+                with open(sample_pdf, 'rb') as f:
+                    file_content = f.read()
+                
+                # Tạo document mới
+                doc_id = doc_manager.add_document(
+                    file_name='1.pdf',
+                    title='Tài liệu mẫu',
+                    description='Tài liệu tuyển sinh mẫu',
+                    file_size=len(file_content)
+                )
+                
+                # Process PDF
+                from io import BytesIO
+                file_obj = BytesIO(file_content)
+                file_obj.name = '1.pdf'
+                process_pdf(file_obj, doc_id)
+                
+                st.success("Đã khởi tạo dữ liệu mẫu")
+        except Exception as e:
+            st.error(f"Lỗi khi khởi tạo dữ liệu mẫu: {str(e)}")
+
+
 def validate_pdf(file):
     """Kiểm tra tính hợp lệ của file PDF"""
     # Kiểm tra kích thước

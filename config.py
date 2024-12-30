@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import json
 
 # Load environment variables
 load_dotenv()
@@ -17,9 +18,19 @@ DOCUMENTS_DIR = os.path.join(DATA_DIR, 'documents')
 VECTORSTORE_DIR = os.path.join(DATA_DIR, 'vectorstore')
 METADATA_FILE = os.path.join(DATA_DIR, 'metadata.json')
 
-# Ensure directories exist
-for directory in [DATA_DIR, DOCUMENTS_DIR, VECTORSTORE_DIR]:
-    os.makedirs(directory, exist_ok=True)
+# Khởi tạo cấu trúc thư mục và file
+def init_storage():
+    # Tạo các thư mục
+    for directory in [DATA_DIR, DOCUMENTS_DIR, VECTORSTORE_DIR]:
+        os.makedirs(directory, exist_ok=True)
+    
+    # Tạo file metadata.json nếu chưa tồn tại
+    if not os.path.exists(METADATA_FILE):
+        with open(METADATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+
+# Gọi hàm khởi tạo
+init_storage()
 
 COHERE_MODEL = "command-xlarge-nightly"
 SCHOOL_CONTACT_INFO = "Trường Cao đẳng Kinh tế Đối ngoại: ĐT (028)38446320, email: tuyensinh@cofer.edu.vn, Website: www.cofer.edu.vn"

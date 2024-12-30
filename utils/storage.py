@@ -12,9 +12,24 @@ import streamlit as st
 from config import COHERE_API_KEY
 
 
+def init_storage():
+    """Khởi tạo cấu trúc thư mục nếu chưa tồn tại"""
+    os.makedirs(DOCUMENTS_DIR, exist_ok=True)
+    os.makedirs(VECTORSTORE_DIR, exist_ok=True)
+    
+    # Tạo file metadata nếu chưa có
+    if not os.path.exists(METADATA_FILE):
+        with open(METADATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+
+
 class DocumentManager:
+
+# Thêm vào __init__ của DocumentManager
     def __init__(self):
+        init_storage()  # Khởi tạo storage
         self.metadata = self._load_metadata()
+
         
     def _load_metadata(self):
         """Load metadata từ file"""

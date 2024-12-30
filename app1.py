@@ -13,59 +13,60 @@ class ChatPDFApp:
     def __init__(self):
         self.doc_manager = DocumentManager()
         self.setup_page()
-        self.init_sample_data()  # Thêm hàm khởi tạo dữ liệu mẫu
     
-    def init_sample_data(self):
-        """Khởi tạo dữ liệu mẫu nếu chưa có document nào"""
+    def setup_page(self):
+        """Configure page settings"""
+        st.set_page_config(
+            page_title="ChatPDF Bot",
+            page_icon="🤖",
+            layout="wide"
+        )
+        
+        # Thêm menu Settings vào sidebar
+        with st.sidebar:
+            if st.button("⚙️ Thiết lập"):
+                st.session_state.show_settings = True
+            if st.button("💬 Chat"):
+                st.session_state.show_settings = False
+                
+            if hasattr(st.session_state, 'is_authenticated') and st.session_state.is_authenticated:
+                if st.button("Đăng xuất"):
+                    logout()
+
+    def handle_file_upload(self, uploaded_file, title, description):
+        """Process file upload with error handling"""
         try:
-            if not self.doc_manager.get_all_documents():
-                sample_pdf = os.path.join('data', 'documents', '1.pdf')
-                if os.path.exists(sample_pdf):
-                    with open(sample_pdf, 'rb') as f:
-                        from io import BytesIO
-                        file_obj = BytesIO(f.read())
-                        file_obj.name = '1.pdf'
-                        
-                        doc_id = self.doc_manager.add_document(
-                            '1.pdf',
-                            'Tài liệu tuyển sinh mẫu',
-                            'Tài liệu hướng dẫn tuyển sinh',
-                            os.path.getsize(sample_pdf)
-                        )
-                        process_pdf(file_obj, doc_id)
+            with st.spinner("Đang xử lý file PDF..."):
+                doc_id = self.doc_manager.add_document(
+                    uploaded_file.name,
+                    title,
+                    description,
+                    uploaded_file.size
+                )
+                
+                if process_pdf(uploaded_file, doc_id):
+                    st.success("Upload và xử lý PDF thành công!")
+                    return True
+                    
         except Exception as e:
-            st.warning("Không thể khởi tạo dữ liệu mẫu. Vui lòng liên hệ admin.")
+            st.error(f"Lỗi khi xử lý file: {str(e)}")
+            return False
 
     def get_chat_response(self, prompt, context):
         """Generate chat response using Cohere"""
-        try:
-            system_prompt = f"""Bạn là trợ lý trả lời câu hỏi dựa trên tài liệu. 
-            Hãy trả lời câu hỏi dựa vào ngữ cảnh được cung cấp.
-            Nếu không tìm thấy thông tin trong ngữ cảnh, hãy hướng dẫn người dùng liên hệ:
-            {SCHOOL_CONTACT_INFO}
-            
-            Ngữ cảnh: {context}"""
-            
-            return co.chat(
-                message=prompt,
-                temperature=0.5,
-                model=COHERE_MODEL,
-                preamble=system_prompt,
-            )
-        except Exception as e:
-            st.error("Lỗi khi tạo phản hồi. Vui lòng thử lại sau.")
-            return None
-
-    def user_page(self):
-        """Render user chat interface"""
-        st.title("Tư vấn tuyển sinh - COFER Bot 🤖")  # Cập nhật tiêu đề
+        system_prompt = f"""Bạn là trợ lý trả lời câu hỏi dựa trên tài liệu. 
+        Hãy trả lời câu hỏi dựa vào ngữ cảnh được cung cấp.
+        Nếu không tìm thấy thông tin trong ngữ cảnh, hãy hướng dẫn người dùng liên hệ:
+        {SCHOOL_CONTACT_INFO}
         
-        docs = self.doc_manager.get_all_documents()
-        if not docs:
-            st.info("Chưa có tài liệu nào được upload. Vui lòng liên hệ admin.")
-            st.write(f"Thông tin liên hệ: {SCHOOL_CONTACT_INFO}")
-            return
-            
+        Ngữ cảnh: {context}"""
+        
+        return co.chat(
+            message=prompt,
+            temperature=0.5,
+            model=COHERE_MODEL,
+            preamble=system_prompt,
+        )
 
     def settings_page(self):
         """Render settings page with admin functions"""
@@ -162,13 +163,6 @@ class ChatPDFApp:
             self.chat_page()
 
 def main():
-    # Khởi tạo storage và dữ liệu mẫu
-    from utils.storage import init_storage
-    from utils.pdf_processor import init_sample_data
-    
-    init_storage()
-    init_sample_data()
-
     app = ChatPDFApp()
     app.main()
 
