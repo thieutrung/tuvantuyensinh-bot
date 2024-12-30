@@ -4,7 +4,6 @@ langchain>=0.1.0
 langchain-community>=0.0.10
 cohere>=5.5.6
 langchain-cohere>=0.3.4
-f--find-links https://dl.fbaipublicfiles.com/faiss/wheel/faiss_cpu-1.7.4-cp39-cp39-linux_x86_64.whl
-faiss-cpu==1.7.4
+faiss-cpu
 PyPDF2==3.0.1
 python-magic==0.4.27
