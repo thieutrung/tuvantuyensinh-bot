@@ -1,3 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 .env
+
+# Data folders
+data/
+*.pdf
+
+# Streamlit
 .streamlit/secrets.toml
+
+# OS
 .DS_Store

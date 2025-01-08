@@ -1,10 +1,10 @@
 {
   "1": {
     "file_name": "TONGHOP_DULIEU_TUYENSINH_2025.pdf",
-    "title": "Tổng hợp tài liệu tuyển sinh",
-    "description": "Tổng hợp tài liệu tuyển sinh năm 2025 của trường Cao đẳng Kinh tế Đối ngoại",
+    "title": "Dữ liệu tuyển sinh",
+    "description": "Tổng hợp dữ liệu tuyển sinh 2025",
     "file_size": 288769,
-    "upload_date": "2025-01-08T10:03:14.924250",
+    "upload_date": "2025-01-08T21:11:42.945784",
     "vectorstore_path": "/Applications/tuvantuyensinh-bot/data/vectorstore/1"
   }
 }
