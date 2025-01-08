@@ -2,18 +2,12 @@ import os
 import magic
 from PyPDF2 import PdfReader
 from io import BytesIO
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-from utils.storage import DocumentManager
-
-#from langchain.vectorstores import FAISS
-from langchain_community.vectorstores import FAISS
-
-from langchain_cohere import CohereEmbeddings
-from config import MAX_FILE_SIZE_MB, DOCUMENTS_DIR
 import streamlit as st
-
-from config import COHERE_API_KEY
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from utils.storage import DocumentManager
+from langchain_community.vectorstores import FAISS
+from langchain_cohere import CohereEmbeddings
+from config import COHERE_API_KEY, COHERE_EMBED_MODEL, MAX_FILE_SIZE_MB, DOCUMENTS_DIR
  
 def init_sample_data():
     """Khởi tạo dữ liệu mẫu nếu chưa có document nào"""
@@ -44,7 +38,6 @@ def init_sample_data():
         except Exception as e:
             st.error(f"Lỗi khi khởi tạo dữ liệu mẫu: {str(e)}")
 
-
 def validate_pdf(file):
     """Kiểm tra tính hợp lệ của file PDF"""
     # Kiểm tra kích thước
@@ -59,8 +52,6 @@ def validate_pdf(file):
     
     if file_type != 'application/pdf':
         raise ValueError("File không phải là PDF hợp lệ")
-
-
 
 def process_pdf(file, doc_id):
     """Xử lý file PDF và tạo vectorstore"""
@@ -95,7 +86,7 @@ def process_pdf(file, doc_id):
         # Tạo embeddings và lưu vectorstore
         embeddings = CohereEmbeddings(
             cohere_api_key=COHERE_API_KEY,
-            model="multilingual-22-12"
+            model=COHERE_EMBED_MODEL
         )
         vectorstore = FAISS.from_texts(chunks, embeddings)
         

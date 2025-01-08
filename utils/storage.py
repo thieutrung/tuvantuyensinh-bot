@@ -1,16 +1,12 @@
 import json
 import os
 import shutil
+import streamlit as st
 from datetime import datetime
 from config import METADATA_FILE, DOCUMENTS_DIR, VECTORSTORE_DIR
-
-#from langchain.vectorstores import FAISS
 from langchain_community.vectorstores import FAISS
-
 from langchain_cohere import CohereEmbeddings
-import streamlit as st
-from config import COHERE_API_KEY
-
+from config import COHERE_API_KEY, COHERE_EMBED_MODEL
 
 def init_storage():
     """Khởi tạo cấu trúc thư mục nếu chưa tồn tại"""
@@ -22,10 +18,8 @@ def init_storage():
         with open(METADATA_FILE, 'w', encoding='utf-8') as f:
             json.dump({}, f)
 
-
 class DocumentManager:
 
-# Thêm vào __init__ của DocumentManager
     def __init__(self):
         init_storage()  # Khởi tạo storage
         self.metadata = self._load_metadata()
@@ -91,7 +85,7 @@ def load_vectorstore(doc_id):
         if doc and os.path.exists(doc['vectorstore_path']):
             embeddings = CohereEmbeddings(
                 cohere_api_key=COHERE_API_KEY,
-                model="multilingual-22-12"
+                model=COHERE_EMBED_MODEL
             )
             return FAISS.load_local(
                 doc['vectorstore_path'],

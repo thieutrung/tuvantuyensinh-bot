@@ -4,6 +4,7 @@ from config import ADMIN_PASSWORD, SESSION_EXPIRY_MINUTES
 
 def check_password():
     """Xác thực mật khẩu admin"""
+       
     if 'admin_authenticated' not in st.session_state:
         st.session_state.admin_authenticated = False
         st.session_state.last_activity = None
@@ -17,16 +18,40 @@ def check_password():
                 return False
         st.session_state.last_activity = datetime.now()
         return True
-        
-    password = st.text_input("Nhập mật khẩu admin:", type="password")
-    if st.button("Đăng nhập"):
-        if password == ADMIN_PASSWORD:
-            st.session_state.admin_authenticated = True
-            st.session_state.last_activity = datetime.now()
-            st.success("Đăng nhập thành công!")
-            st.rerun()
-        else:
-            st.error("Mật khẩu không đúng!")
+    
+    # Add custom CSS to position the login form
+    st.markdown("""
+        <style>
+        [data-testid="stForm"] {
+            max-width: 400px;
+            margin-top: 0;
+            padding-top: 0;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Create columns to position the login form
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        with st.form("login_form"):
+            st.markdown("### Đăng nhập")
+            password = st.text_input("Nhập mật khẩu admin:", type="password")
+            
+            # Add some vertical spacing before the button
+            st.write("")
+            
+            login_button = st.form_submit_button("Đăng nhập", use_container_width=True)
+            
+            if login_button:
+                if password == ADMIN_PASSWORD:
+                    st.session_state.admin_authenticated = True
+                    st.session_state.last_activity = datetime.now()
+                    st.success("Đăng nhập thành công!")
+                    st.rerun()
+                else:
+                    st.error("Mật khẩu không đúng!")
+    
     return False
 
 def logout():

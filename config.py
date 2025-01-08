@@ -6,10 +6,14 @@ import json
 load_dotenv()
 
 # Application Config
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'thieutrung@2025')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 COHERE_API_KEY = os.getenv('COHERE_API_KEY')
+COHERE_MODEL = "command-xlarge-nightly"
+COHERE_EMBED_MODEL = "multilingual-22-12"
 MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', 10))
 SESSION_EXPIRY_MINUTES = int(os.getenv('SESSION_EXPIRY_MINUTES', 30))
+KMP_DUPLICATE_LIB_OK=True
+SCHOOL_CONTACT_INFO = "Trường Cao đẳng Kinh tế Đối ngoại: ĐT (028)38446320, email: tuyensinh@cofer.edu.vn, Website: www.cofer.edu.vn"
 
 # File paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,6 +35,3 @@ def init_storage():
 
 # Gọi hàm khởi tạo
 init_storage()
-
-COHERE_MODEL = "command-xlarge-nightly"
-SCHOOL_CONTACT_INFO = "Trường Cao đẳng Kinh tế Đối ngoại: ĐT (028)38446320, email: tuyensinh@cofer.edu.vn, Website: www.cofer.edu.vn"

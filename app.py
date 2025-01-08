@@ -1,10 +1,10 @@
 import streamlit as st
 import cohere
 from datetime import datetime
-from utils.auth import check_password, logout
+from config import COHERE_API_KEY, COHERE_MODEL, COHERE_EMBED_MODEL, ADMIN_PASSWORD, SCHOOL_CONTACT_INFO
 from utils.storage import DocumentManager, load_vectorstore
 from utils.pdf_processor import process_pdf
-from config import COHERE_API_KEY, COHERE_MODEL, SCHOOL_CONTACT_INFO
+from utils.auth import check_password, logout
 
 # Initialize Cohere client
 co = cohere.Client(api_key=COHERE_API_KEY)
@@ -13,86 +13,204 @@ class ChatPDFApp:
     def __init__(self):
         self.doc_manager = DocumentManager()
         self.setup_page()
-        self.init_sample_data()  # Thêm hàm khởi tạo dữ liệu mẫu
+        if 'vectorstore_cache' not in st.session_state:
+            st.session_state.vectorstore_cache = {}
     
-    def init_sample_data(self):
-        """Khởi tạo dữ liệu mẫu nếu chưa có document nào"""
+    def setup_page(self):
+        """Configure page settings"""
+        st.set_page_config(
+            page_title="Tu van tuyen sinh Bot",
+            page_icon="🤖",
+            layout="wide",
+            menu_items={
+                'Get Help': None,
+                'Report a bug': None,
+                'About': None
+            }
+        ) 
+
+        # Hide default menu and header
+        hide_style = """
+        <style>
+            #MainMenu {visibility: hidden !important;}
+            header {visibility: hidden !important;}
+        </style>
+        """
+        st.markdown(hide_style, unsafe_allow_html=True)
+
+        # Add custom CSS for layout and components
+        custom_style = """
+        <style>
+        /* Toggle button styling */
+        .stButton > button[kind="secondary"] {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            z-index: 999;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .stButton > button[kind="secondary"]:hover {
+            background-color: rgba(240, 240, 240, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Form layout styling */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        /* Chat interface styling */
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Document list container */
+        .document-list-container {
+            padding-right: 100px;
+            max-width: calc(100% - 100px);
+            position: relative;
+        }
+
+        /* Style for expander content */
+        .streamlit-expanderContent {
+            max-width: 100%;
+            padding-right: 20px;
+        }
+
+        /* Container cho nút xóa */
+        .delete-button-wrapper {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        /* Style cho nút xóa */
+        .delete-button-wrapper .stButton > button {
+            width: auto;
+            margin-left: 0;
+            margin-bottom: 20px; /* Thêm khoảng cách bên dưới */
+        }
+
+        /* Settings page styling */
+        .settings-container {
+            margin-top: 2rem;
+        }
+
+        /* Center align headers */
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        </style>
+        """
+        st.markdown(custom_style, unsafe_allow_html=True)
+        
+        # Toggle button for settings
+        if 'show_settings' not in st.session_state:
+            st.session_state.show_settings = False
+            
+        col1, col2 = st.columns([0.95, 0.05])
+        with col2:
+            if st.button("⚙️" if not st.session_state.show_settings else "✖️", key="settings_toggle"):
+                if st.session_state.show_settings:
+                    # Log out when closing settings
+                    st.session_state.admin_authenticated = False
+                st.session_state.show_settings = not st.session_state.show_settings
+                st.rerun()
+
+    def handle_file_upload(self, uploaded_file, title, description):
+        """Process file upload with error handling"""
         try:
-            if not self.doc_manager.get_all_documents():
-                sample_pdf = os.path.join('data', 'documents', '1.pdf')
-                if os.path.exists(sample_pdf):
-                    with open(sample_pdf, 'rb') as f:
-                        from io import BytesIO
-                        file_obj = BytesIO(f.read())
-                        file_obj.name = '1.pdf'
-                        
-                        doc_id = self.doc_manager.add_document(
-                            '1.pdf',
-                            'Tài liệu tuyển sinh mẫu',
-                            'Tài liệu hướng dẫn tuyển sinh',
-                            os.path.getsize(sample_pdf)
-                        )
-                        process_pdf(file_obj, doc_id)
+            with st.spinner("Đang xử lý file tài liệu..."):
+                doc_id = self.doc_manager.add_document(
+                    uploaded_file.name,
+                    title,
+                    description,
+                    uploaded_file.size
+                )
+                
+                if process_pdf(uploaded_file, doc_id):
+                    st.success("Upload và xử lý tài liệu thành công!")
+                    return True
+                    
         except Exception as e:
-            st.warning("Không thể khởi tạo dữ liệu mẫu. Vui lòng liên hệ admin.")
+            st.error(f"Lỗi khi xử lý file: {str(e)}")
+            return False
 
     def get_chat_response(self, prompt, context):
         """Generate chat response using Cohere"""
-        try:
-            system_prompt = f"""Bạn là trợ lý trả lời câu hỏi dựa trên tài liệu. 
-            Hãy trả lời câu hỏi dựa vào ngữ cảnh được cung cấp.
-            Nếu không tìm thấy thông tin trong ngữ cảnh, hãy hướng dẫn người dùng liên hệ:
-            {SCHOOL_CONTACT_INFO}
-            
-            Ngữ cảnh: {context}"""
-            
-            return co.chat(
-                message=prompt,
-                temperature=0.5,
-                model=COHERE_MODEL,
-                preamble=system_prompt,
-            )
-        except Exception as e:
-            st.error("Lỗi khi tạo phản hồi. Vui lòng thử lại sau.")
-            return None
-
-    def user_page(self):
-        """Render user chat interface"""
-        st.title("Tư vấn tuyển sinh - COFER Bot 🤖")  # Cập nhật tiêu đề
+        system_prompt = f"""Bạn là trợ lý trả lời câu hỏi dựa trên tài liệu với vai trò là chuyên viên tư vấn tuyển sinh. 
+        Hãy trả lời câu hỏi dựa vào ngữ cảnh được cung cấp.
+        Nếu không tìm thấy thông tin trong ngữ cảnh, hãy hướng dẫn người dùng liên hệ:
+        {SCHOOL_CONTACT_INFO}
         
-        docs = self.doc_manager.get_all_documents()
-        if not docs:
-            st.info("Chưa có tài liệu nào được upload. Vui lòng liên hệ admin.")
-            st.write(f"Thông tin liên hệ: {SCHOOL_CONTACT_INFO}")
-            return
-            
+        Ngữ cảnh: {context}"""
+        
+        return co.chat(
+            message=prompt,
+            temperature=0.5,
+            model=COHERE_MODEL,
+            preamble=system_prompt,
+        )
 
     def settings_page(self):
         """Render settings page with admin functions"""
-        st.title("Thiết lập - Quản lý tài liệu PDF")
+        st.markdown('<div class="settings-container">', unsafe_allow_html=True)
+        st.title("Thiết lập - Quản lý tài liệu")
         
-        if not check_password():
+        authenticated = check_password()
+         
+        if not authenticated:
+            st.markdown('</div>', unsafe_allow_html=True)
             return
             
         tab1, tab2 = st.tabs(["Upload Tài Liệu", "Quản Lý Tài Liệu"])
         
         with tab1:
-            with st.form("upload_form"):
-                uploaded_file = st.file_uploader("Chọn file PDF", type="pdf")
-                title = st.text_input("Tiêu đề tài liệu:")
-                description = st.text_area("Mô tả tài liệu:")
-                
-                if st.form_submit_button("Upload"):
-                    if not (uploaded_file and title):
-                        st.warning("Vui lòng điền đầy đủ thông tin!")
-                        return
-                        
-                    self.handle_file_upload(uploaded_file, title, description)
+            st.markdown('<div class="form-container">', unsafe_allow_html=True)
+            col1, col2, col3 = st.columns([1, 2, 1])
+            
+            with col2:
+                with st.form("upload_form", clear_on_submit=True):
+                    st.markdown("### Upload tài liệu mới")
+                    uploaded_file = st.file_uploader("Chọn file PDF", type="pdf")
+                    title = st.text_input("Tiêu đề tài liệu:")
+                    description = st.text_area("Mô tả tài liệu:")
+                    
+                    st.write("")  # Add spacing
+                    
+                    if st.form_submit_button("Upload", use_container_width=True):
+                        if not (uploaded_file and title):
+                            st.warning("Vui lòng điền đầy đủ thông tin!")
+                            return
+                            
+                        if self.handle_file_upload(uploaded_file, title, description):
+                            st.session_state.show_settings = False
+                            st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
             
         with tab2:
+            st.markdown('<div class="form-container">', unsafe_allow_html=True)
             st.subheader("Danh sách tài liệu")
             docs = self.doc_manager.get_all_documents()
             
+            st.markdown('<div class="document-list-container">', unsafe_allow_html=True)
             for doc_id, doc in docs.items():
                 with st.expander(f"📄 {doc['title']}"):
                     st.write(f"**Mô tả:** {doc['description']}")
@@ -100,75 +218,84 @@ class ChatPDFApp:
                     st.write(f"**Kích thước:** {doc['file_size'] / 1024:.1f} KB")
                     st.write(f"**Ngày upload:** {datetime.fromisoformat(doc['upload_date']).strftime('%d/%m/%Y %H:%M')}")
                     
+                    # Wrap delete button in a flex container
+                    st.markdown('<div class="delete-button-wrapper">', unsafe_allow_html=True)
                     if st.button(f"🗑️ Xóa tài liệu", key=f"del_{doc_id}"):
                         if self.doc_manager.delete_document(doc_id):
                             st.success("Đã xóa tài liệu!")
+                            st.session_state.show_settings = False
                             st.rerun()
                         else:
                             st.error("Không thể xóa tài liệu!")
+                    st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    def get_vectorstore(self, doc_id):
+        """Load and cache vectorstore"""
+        if doc_id not in st.session_state.vectorstore_cache:
+            vectorstore = load_vectorstore(doc_id)
+            if vectorstore:
+                st.session_state.vectorstore_cache[doc_id] = vectorstore
+                return vectorstore
+            return None
+        return st.session_state.vectorstore_cache[doc_id]
 
     def chat_page(self):
-        """Render simplified chat interface"""
+        """Render chat interface"""
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         st.title("Tư vấn tuyển sinh - COFER Bot 🤖")
         
         docs = self.doc_manager.get_all_documents()
         if not docs:
             st.info("Chưa có tài liệu nào được upload. Vui lòng liên hệ admin.")
+            st.markdown('</div>', unsafe_allow_html=True)
             return
             
-        # Get the first document (most recently uploaded)
         latest_doc_id = list(docs.keys())[0]
             
-        # Initialize chat history
         if "messages" not in st.session_state:
             st.session_state.messages = []
             
-        # Display chat history
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
                 
-        # Handle new messages
         if prompt := st.chat_input("Nhập câu hỏi của bạn"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
                 
-            vectorstore = load_vectorstore(latest_doc_id)
-            if not vectorstore:
-                st.error("Không thể tải dữ liệu tài liệu!")
-                return
-                
-            # Find relevant passages
-            docs = vectorstore.similarity_search(prompt, k=3)
-            context = "\n".join([doc.page_content for doc in docs])
-            
-            # Generate and display response
-            response = self.get_chat_response(prompt, context)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
             with st.chat_message("assistant"):
-                st.markdown(response.text)
+                with st.spinner("Thinking..."):
+                    vectorstore = self.get_vectorstore(latest_doc_id)
+                    if vectorstore:
+                        docs = vectorstore.similarity_search(prompt, k=3)
+                        context = "\n".join([doc.page_content for doc in docs])    
+                        response = self.get_chat_response(prompt, context)
+                        st.session_state.messages.append({"role": "assistant", "content": response.text})
+                        st.markdown(response.text)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
     def main(self):
         """Main application logic"""
-        # Initialize show_settings in session state if not present
         if 'show_settings' not in st.session_state:
             st.session_state.show_settings = False
             
-        # Show either settings or chat page based on session state
+        if 'vectorstore_cache' not in st.session_state:
+            st.session_state.vectorstore_cache = {}
+            
+        st.markdown('<div class="main-container">', unsafe_allow_html=True)
         if st.session_state.show_settings:
             self.settings_page()
         else:
             self.chat_page()
+        st.markdown('</div>', unsafe_allow_html=True)
 
 def main():
-    # Khởi tạo storage và dữ liệu mẫu
-    from utils.storage import init_storage
-    from utils.pdf_processor import init_sample_data
-    
-    init_storage()
-    init_sample_data()
-
     app = ChatPDFApp()
     app.main()
 
