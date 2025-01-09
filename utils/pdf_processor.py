@@ -7,7 +7,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from utils.storage import DocumentManager
 from langchain_community.vectorstores import FAISS
 from langchain_cohere import CohereEmbeddings
-from config import COHERE_API_KEY, COHERE_EMBED_MODEL, MAX_FILE_SIZE_MB, DOCUMENTS_DIR
+from config import MAX_FILE_SIZE_MB, DOCUMENTS_DIR
  
 COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
 COHERE_EMBED_MODEL = st.secrets["COHERE_EMBED_MODEL"]

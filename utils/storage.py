@@ -6,7 +6,6 @@ from datetime import datetime
 from config import METADATA_FILE, DOCUMENTS_DIR, VECTORSTORE_DIR
 from langchain_community.vectorstores import FAISS
 from langchain_cohere import CohereEmbeddings
-from config import COHERE_API_KEY, COHERE_EMBED_MODEL
 
 COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
 COHERE_EMBED_MODEL = st.secrets["COHERE_EMBED_MODEL"]

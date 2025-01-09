@@ -1,14 +1,14 @@
 import streamlit as st
 import cohere
 from datetime import datetime
-from config import COHERE_API_KEY, COHERE_MODEL, COHERE_EMBED_MODEL, ADMIN_PASSWORD, SCHOOL_CONTACT_INFO
+#from config import COHERE_API_KEY, COHERE_MODEL, COHERE_EMBED_MODEL, ADMIN_PASSWORD, SCHOOL_CONTACT_INFO
 from utils.storage import DocumentManager, load_vectorstore
 from utils.pdf_processor import process_pdf
 from utils.auth import check_password, logout
 
 COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
 COHERE_MODEL = st.secrets["COHERE_MODEL"]
-COHERE_EMBED_MODEL = st.secrets["COHERE_EMBED_MODEL"]
+SCHOOL_CONTACT_INFO = st.secrets["SCHOOL_CONTACT_INFO"]
 
 # Initialize Cohere client
 co = cohere.Client(api_key=COHERE_API_KEY)

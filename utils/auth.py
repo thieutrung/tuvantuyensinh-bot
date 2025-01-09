@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
-from config import ADMIN_PASSWORD, SESSION_EXPIRY_MINUTES
+from config import SESSION_EXPIRY_MINUTES
+ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 def check_password():
     """Xác thực mật khẩu admin"""
