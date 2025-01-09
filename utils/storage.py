@@ -9,14 +9,20 @@ from langchain_cohere import CohereEmbeddings
 from config import COHERE_API_KEY, COHERE_EMBED_MODEL
 
 def init_storage():
-    """Khởi tạo cấu trúc thư mục nếu chưa tồn tại"""
-    os.makedirs(DOCUMENTS_DIR, exist_ok=True)
-    os.makedirs(VECTORSTORE_DIR, exist_ok=True)
-    
-    # Tạo file metadata nếu chưa có
-    if not os.path.exists(METADATA_FILE):
-        with open(METADATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump({}, f)
+    """Khởi tạo storage với xử lý lỗi"""
+    try:
+        os.makedirs(DOCUMENTS_DIR, exist_ok=True)
+        os.makedirs(VECTORSTORE_DIR, exist_ok=True)
+        
+        if not os.path.exists(METADATA_FILE):
+            with open(METADATA_FILE, 'w', encoding='utf-8') as f:
+                json.dump({}, f)
+                
+    except Exception as e:
+        st.error(f"Lỗi khởi tạo storage: {str(e)}")
+        raise
+
+
 
 class DocumentManager:
 

@@ -1,0 +1,11 @@
+[server]
+# Đường dẫn tương đối đến file chứa ứng dụng Streamlit của bạn
+# Ví dụ nếu app của bạn ở trong thư mục src/app.py
+headless = true
+runOnSave = true
+enableCORS = true
+enableXsrfProtection = true
+
+[browser]
+serverAddress = "0.0.0.0"
+serverPort = 8501
