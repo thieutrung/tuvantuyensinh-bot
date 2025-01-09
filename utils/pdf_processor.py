@@ -9,6 +9,9 @@ from langchain_community.vectorstores import FAISS
 from langchain_cohere import CohereEmbeddings
 from config import COHERE_API_KEY, COHERE_EMBED_MODEL, MAX_FILE_SIZE_MB, DOCUMENTS_DIR
  
+COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
+COHERE_EMBED_MODEL = st.secrets["COHERE_EMBED_MODEL"]
+
 def init_sample_data():
     """Khởi tạo dữ liệu mẫu nếu chưa có document nào"""
     doc_manager = DocumentManager()

@@ -19,13 +19,13 @@ os.makedirs(VECTORSTORE_DIR, exist_ok=True)
 
 # Kiểm tra biến môi trường bắt buộc
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
-COHERE_API_KEY = os.getenv('COHERE_API_KEY')
+#COHERE_API_KEY = os.getenv('COHERE_API_KEY')
 
 if not ADMIN_PASSWORD or not COHERE_API_KEY:
     raise ValueError("Missing required environment variables: ADMIN_PASSWORD, COHERE_API_KEY")
 
-COHERE_MODEL = "command-xlarge-nightly"
-COHERE_EMBED_MODEL = "multilingual-22-12"
+#COHERE_MODEL = "command-xlarge-nightly"
+#COHERE_EMBED_MODEL = "multilingual-22-12"
 MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', 10))
 SESSION_EXPIRY_MINUTES = int(os.getenv('SESSION_EXPIRY_MINUTES', 30))
 KMP_DUPLICATE_LIB_OK=True
