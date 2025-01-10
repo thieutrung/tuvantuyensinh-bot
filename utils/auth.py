@@ -1,11 +1,11 @@
 import streamlit as st
 from datetime import datetime, timedelta
 from config import SESSION_EXPIRY_MINUTES
+
 ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 def check_password():
     """Xác thực mật khẩu admin"""
-       
     if 'admin_authenticated' not in st.session_state:
         st.session_state.admin_authenticated = False
         st.session_state.last_activity = None
@@ -19,13 +19,13 @@ def check_password():
                 return False
         st.session_state.last_activity = datetime.now()
         return True
-    
+
     # Add custom CSS to position the login form
     st.markdown("""
         <style>
         [data-testid="stForm"] {
             max-width: 400px;
-            margin-top: 0;
+            margin: 0 auto;
             padding-top: 0;
         }
         </style>
