@@ -12,11 +12,12 @@ DOCUMENTS_DIR = os.path.join(DATA_DIR, 'documents')
 VECTORSTORE_DIR = os.path.join(DATA_DIR, 'vectorstore')
 METADATA_FILE = os.path.join(DATA_DIR, 'metadata.json')
 
-# Kiểm tra và tạo thư mục data nếu chưa tồn tại
+# Tạo thư mục nếu chưa tồn tại
 os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(DOCUMENTS_DIR, exist_ok=True) 
+os.makedirs(DOCUMENTS_DIR, exist_ok=True)
 os.makedirs(VECTORSTORE_DIR, exist_ok=True)
 
-MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', 10))
-SESSION_EXPIRY_MINUTES = int(os.getenv('SESSION_EXPIRY_MINUTES', 30))
-KMP_DUPLICATE_LIB_OK=int(os.getenv('SESSION_EXPIRY_MINUTES', True))
+# Load configuration từ environment variables
+MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', 20))
+SESSION_EXPIRY_MINUTES = int(os.getenv('SESSION_EXPIRY_MINUTES', 60))
+KMP_DUPLICATE_LIB_OK = bool(os.getenv('KMP_DUPLICATE_LIB_OK', True))
