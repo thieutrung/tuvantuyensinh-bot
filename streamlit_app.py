@@ -243,8 +243,8 @@ class ChatPDFApp:
             vectorstore = load_vectorstore(doc_id)
             if vectorstore:
                 st.session_state.vectorstore_cache[doc_id] = vectorstore
-                return vectorstore
-            return None
+            else:
+                st.session_state.vectorstore_cache[doc_id] = None
         return st.session_state.vectorstore_cache[doc_id]
 
     def chat_page(self):
