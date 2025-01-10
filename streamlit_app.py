@@ -1,7 +1,6 @@
 import streamlit as st
 import cohere
 from datetime import datetime
-#from config import COHERE_API_KEY, COHERE_MODEL, COHERE_EMBED_MODEL, ADMIN_PASSWORD, SCHOOL_CONTACT_INFO
 from utils.storage import DocumentManager, load_vectorstore
 from utils.pdf_processor import process_pdf
 from utils.auth import check_password, logout
@@ -19,7 +18,7 @@ class ChatPDFApp:
         self.setup_page()
         if 'vectorstore_cache' not in st.session_state:
             st.session_state.vectorstore_cache = {}
-    
+
     def setup_page(self):
         """Configure page settings"""
         st.set_page_config(
@@ -31,99 +30,11 @@ class ChatPDFApp:
                 'Report a bug': None,
                 'About': None
             }
-        ) 
+        )
 
-        # Hide default menu and header
-        hide_style = """
-        <style>
-            #MainMenu {visibility: hidden !important;}
-            header {visibility: hidden !important;}
-        </style>
-        """
-        st.markdown(hide_style, unsafe_allow_html=True)
-
-        # Add custom CSS for layout and components
-        custom_style = """
-        <style>
-        /* Toggle button styling */
-        .stButton > button[kind="secondary"] {
-            position: fixed;
-            right: 20px;
-            top: 20px;
-            z-index: 999;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        .stButton > button[kind="secondary"]:hover {
-            background-color: rgba(240, 240, 240, 0.9);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Form layout styling */
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-        .form-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-        }
-
-        /* Chat interface styling */
-        .chat-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        /* Document list container */
-        .document-list-container {
-            padding-right: 100px;
-            max-width: calc(100% - 100px);
-            position: relative;
-        }
-
-        /* Style for expander content */
-        .streamlit-expanderContent {
-            max-width: 100%;
-            padding-right: 20px;
-        }
-
-        /* Container cho nút xóa */
-        .delete-button-wrapper {
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: flex-start;
-        }
-
-        /* Style cho nút xóa */
-        .delete-button-wrapper .stButton > button {
-            width: auto;
-            margin-left: 0;
-            margin-bottom: 20px; /* Thêm khoảng cách bên dưới */
-        }
-
-        /* Settings page styling */
-        .settings-container {
-            margin-top: 2rem;
-        }
-
-        /* Center align headers */
-        h1, h2, h3 {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        </style>
-        """
-        st.markdown(custom_style, unsafe_allow_html=True)
+        # Load custom CSS from file
+        with open('styles.css') as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
         
         # Toggle button for settings
         if 'show_settings' not in st.session_state:
@@ -179,7 +90,7 @@ class ChatPDFApp:
         st.title("Thiết lập - Quản lý tài liệu")
         
         authenticated = check_password()
-         
+        
         if not authenticated:
             st.markdown('</div>', unsafe_allow_html=True)
             return
