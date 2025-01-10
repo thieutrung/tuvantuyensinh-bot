@@ -24,15 +24,12 @@ def init_storage():
         st.error(f"Lỗi khởi tạo storage: {str(e)}")
         raise
 
-
-
 class DocumentManager:
 
     def __init__(self):
         init_storage()  # Khởi tạo storage
         self.metadata = self._load_metadata()
 
-        
     def _load_metadata(self):
         """Load metadata từ file"""
         if os.path.exists(METADATA_FILE):
