@@ -8,7 +8,7 @@ from utils.storage import DocumentManager
 from langchain_community.vectorstores import FAISS
 from langchain_cohere import CohereEmbeddings
 from config import MAX_FILE_SIZE_MB, DOCUMENTS_DIR
- 
+
 COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
 COHERE_EMBED_MODEL = st.secrets["COHERE_EMBED_MODEL"]
 
@@ -32,7 +32,6 @@ def init_sample_data():
                 )
                 
                 # Process PDF
-                from io import BytesIO
                 file_obj = BytesIO(file_content)
                 file_obj.name = '1.pdf'
                 process_pdf(file_obj, doc_id)
