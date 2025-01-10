@@ -5,6 +5,9 @@ from utils.storage import DocumentManager, load_vectorstore
 from utils.pdf_processor import process_pdf
 from utils.auth import check_password, logout
 
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
 COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
 COHERE_MODEL = st.secrets["COHERE_MODEL"]
 SCHOOL_CONTACT_INFO = st.secrets["SCHOOL_CONTACT_INFO"]
