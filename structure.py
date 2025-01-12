@@ -2,11 +2,11 @@ chatpdf_v2/
 │
 ├── .env                    # File chứa các biến môi trường
 ├── requirements.txt        # File chứa các dependencies
-├── app.py                  # File chính của ứng dụng
-├── config.py              # Cấu hình ứng dụng
+├── streamlit_app.py        # File chính của ứng dụng
+├── config.py               # Cấu hình ứng dụng
+├── styles.css              # Khai báo các style sử dụng trong giao diện 
 │
 ├── utils/
-│   ├── __init__.py
 │   ├── auth.py            # Xử lý authentication
 │   ├── pdf_processor.py   # Xử lý PDF
 │   └── storage.py         # Xử lý lưu trữ
