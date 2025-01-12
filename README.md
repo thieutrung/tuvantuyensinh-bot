@@ -43,26 +43,25 @@ tuvantuyensinh-bot/
 │
 ├── .env                    # File chứa các biến môi trường
 ├── requirements.txt        # File chứa các dependencies
-├── app.py                  # File chính của ứng dụng
+├── streamlit_app.py        # File chính của ứng dụng
 ├── config.py               # Cấu hình ứng dụng
+├── styles.css              # Khai báo các style sử dụng trong giao diện 
 │
 ├── utils/
-│   ├── __init__.py
-│   ├── auth.py            # Xử lý authentication
-│   ├── pdf_processor.py   # Xử lý PDF
-│   └── storage.py         # Xử lý lưu trữ
+│   ├── auth.py             # Xử lý authentication
+│   ├── pdf_processor.py    # Xử lý PDF
+│   └── storage.py          # Xử lý lưu trữ
 │
 └── data/
-    ├── vectorstore/       # Thư mục chứa FAISS vectorstore
-    ├── documents/         # Thư mục chứa PDF files
-    └── metadata.json      # File chứa metadata của documents
-
+    ├── vectorstore/        # Thư mục chứa FAISS vectorstore
+    ├── documents/          # Thư mục chứa PDF files
+    └── metadata.json       # File chứa metadata của documents
 
 ## Resources
 Thanks to the amazing libraries and services listed below:
 * [Langchain](https://www.langchain.com/)
 * [Cohere] (https://cohere.com)
+* [Streamlit] (https://streamlit.io) 
 
 ## License
 MIT
-
